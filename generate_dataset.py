@@ -7,38 +7,49 @@ Created on Sat Apr  8 20:00:43 2023
 
 import numpy as np
 
-def generate(med0, dp0, med1, dp1):
+def generate(medias, sigmas , balance, multiclass):
     
+    if (balance == True):
+        mult = 1
+    else:
+        mult = 3
+
+    if (multiclass == True):
+        num_classes = len(medias)
+    else:
+        num_classes = 2
+
+
     # Definir o número de exemplos e características
     num_samples = 75 #fara 2 vezes, entao dataset de 150 samples
     num_atb = 2
     
-    # Gerar características aleatórias de distribuição normal com média e desvio padrão específicos
-    atb0 = np.random.normal(med0, dp0, (num_samples, num_atb) )
-    
-    # Gerar características aleatórias de distribuição normal com média e desvio padrão específicos
-    atb1 = np.random.normal(med1, dp1, (num_samples, num_atb) )
-    
-    
-    atributos = np.append(atb0, atb1, axis = 0)
-    
-    # Atribuir rótulos (0 ou 1) com base em uma condição
-    # Neste exemplo, rótulo 0 para valores com soma das características < 4 e rótulo 1 caso contrário
-    somas = np.sum(atributos, axis=1)
-    labels = np.where(somas < 4, 0, 1)
+    labels = []
+    attributes = []
+
+    for i in range(num_classes):
+        if ( (i == 0) or (i == 2) or (i == 4)):
+            num_samples = num_samples*mult
+
+        class_attributes = np.random.normal(medias[i], sigmas[i], ( num_samples, num_atb) )
+        class_labels = np.full((num_samples,), i)  # Rótulos da classe
+
+        labels.extend(class_labels)
+        attributes.extend(class_attributes)    
+
     
     # Imprimir o conjunto de treinamento gerado
     print("Atributos:")
-    print(atributos)
+    print(attributes)
     print("Labels:")
     print(labels)
     
     
     # Adicionar coluna de rótulos às características
-    dataset = np.column_stack((labels, atributos))
+    dataset = np.column_stack((labels, attributes))
     
     # Imprimir o conjunto de treinamento gerado com rótulos
     print("Características com Rótulos:")
     print(dataset)
     
-    return labels, atributos, dataset
+    return labels, attributes, dataset
