@@ -7,7 +7,6 @@ Created on Sat Apr  8 10:51:15 2023
 
 import numpy as np
 import generate_dataset as gendata
-import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import tree
 from sklearn.model_selection import train_test_split
@@ -28,11 +27,13 @@ class Perceptron:
         self.bias = None
 
     def fit(self, training_inputs, labels):
+        training_inputs = np.array(training_inputs)
         n_samples, n_features = training_inputs.shape
         
         self.weights = np.zeros(n_features)
         self.bias = 0
         
+        labels = np.array(labels)
         labels_ = np.where(labels > 0,1,0)
         
         # aprende os pesos 
@@ -54,24 +55,64 @@ class Perceptron:
         y_predicted = self.activation_function(linear_output)
         return y_predicted
 
+#classe em teste, faz chamadas para o perceptron em si
+
+class MulticlassPerceptron:
+    def __init__(self, n_classes, learning_rate=0.1, n_iterations=100):
+        self.n_classes = n_classes
+        self.lr = learning_rate
+        self.n_iterations = n_iterations
+        self.activation_function = unit_step_function
+        self.classifiers = []
+
+    def fit(self, training_inputs, labels):
+        training_inputs = np.array(training_inputs)
+        n_samples, n_features = training_inputs.shape
+        unique_classes = np.unique(labels)
+
+        if self.n_classes != len(unique_classes):
+            raise ValueError("The number of classes specified doesn't match the number of unique classes in the data.")
+
+        for target_class in unique_classes:
+            binary_labels = np.where(labels == target_class, 1, 0)
+            classifier = Perceptron(learning_rate=self.lr, n_iterations=self.n_iterations)
+            classifier.fit(training_inputs, binary_labels)
+            self.classifiers.append(classifier)
+
+    def predict(self, inputs):
+        inputs = np.array(inputs)
+        class_outputs = np.array([classifier.predict(inputs) for classifier in self.classifiers])
+        predicted_class = np.argmax(class_outputs)
+        return predicted_class
+
 # Gera o dataset com a chamada da biblioteca
 # biblioteca retorna: labels, atributos e dataset completo
-y, x, dataset = gendata.generate(0, 0.5, 3, 0.5)
+
+med = [1.5,  3, 4]
+dp = [0.5, 0.5, 1]
+
+y, x, dataset = gendata.generate(med, dp, True, False)
+
 
 
 X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=0, train_size = .75)
 
+X_train = np.array(X_train)
+y_train = np.array(y_train)
+
 
 
 # Criar um objeto Perceptron com 3 entradas, taxa de aprendizagem de 0.1 e 100 iterações
-pcp = Perceptron( learning_rate=0.1, n_iterations=100)
+#pcp = Perceptron( learning_rate=0.1, n_iterations=100)
+
+pcp = MulticlassPerceptron(n_classes=3, learning_rate=0.1, n_iterations=100)
 
 def accuracy(y_true, y_pred):
     accuracy = np.sum(y_true == y_pred) / len(y_true)
     return accuracy
 
 pcp.fit(X_train, y_train)
-predictions = pcp.predict(X_test)
+predictions = [ pcp.predict(X_test) for x in X_test]
 
 print("Perceptron classification accuracy", accuracy(y_test, predictions))
 
