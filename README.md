@@ -1,10 +1,10 @@
 # Trabalho Perceptron da disciplina de Sistemas Inteligentes
 
 ## Requerimentos mínimos:
-1- Numpy
-2- Matplotlib
-3- Scikit-learn
-4- Python 3.8.3
+1 - Numpy
+2 - Matplotlib
+3 - Scikit-learn
+4 - Python 3.8.3
 
 ## Para executar:
 1- Pelo Spyder:
